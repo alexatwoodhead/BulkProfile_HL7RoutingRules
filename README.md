@@ -20,7 +20,7 @@ On System B
 * Output a CSV file for routing events
 
 Using faviorite comprison tool:
-* Compare the two CVS files
+* Compare the two CSV files
 
 ![Comparison of Report files](/images/CompareCSV.png "Comparison of Report files")
 
