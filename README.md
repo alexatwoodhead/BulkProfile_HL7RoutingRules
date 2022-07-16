@@ -35,6 +35,16 @@ set targetName="MsgRouter"
 do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
 
 ```
+Argument "fileWildCard"
+ - A pattern to match HL7 file names to be processed.
+ - For example if files have a "*.hl7" suffix. Use "*.hl7" instead.
+
+Argument "serviceName" (Required)
+ - This is the configuration name in the current production for the Service you want to send all HL7 messages from.
+
+Argument "targetName" - (Optional)
+ - This is the first target of the service.
+ - If not specified will just use the TargetConfigName defined in the current production settings. 
 
 By default CSV reports will be created in same directory as source HL7 input files. Specify an absolute path if you want in a different location.
 
