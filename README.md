@@ -36,6 +36,6 @@ do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWild
 
 ```
 
-By default CSV reports will be created in same directory as source HL7 input files. Specify an absolute location if you want in a different location.
+By default CSV reports will be created in same directory as source HL7 input files. Specify an absolute path if you want in a different location.
 
 
