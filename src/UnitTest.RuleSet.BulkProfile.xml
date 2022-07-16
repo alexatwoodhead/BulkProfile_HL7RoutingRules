@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-16 17:23:51">
+<Class name="UnitTest.RuleSet.BulkProfile">
+<Description><![CDATA[
+<pre>
+Copyright (c) Alex Woodhead 2022
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+License MIT
+Source: https://github.com/alexatwoodhead/UnitTest_RuleSet
+Version: 1.0
+</pre>]]]]><![CDATA[>
+Utility to generate reports on how each file is processed for comparison with routing behaviour of another installation.
+HL7 DocType is determined by the configuration of the service.<br/>
+Production must already be running in order to run the routing Test
+Run the utility with same files on different environments.
+Then use favourite difference utility to compare CSV output files to see difference / assurance of behaviour consistency.
+Usage
+<example>
+set inputDirectory="C:\temp\RuleSetHL7"
+set fileWildCard="*.txt"
+set outputReport="RuleReportIRIS2022.csv"
+set serviceName="From_SystemZ"
+set targetName="MsgRouter"
+do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
+</example>]]></Description>
+<Abstract>1</Abstract>
+<TimeChanged>66306,62594.8462788</TimeChanged>
+<TimeCreated>66304,75552.1931217</TimeCreated>
+
+<Parameter name="SortBy">
+<Description>
+Override with name of existing service on production
+Parameter SourceBusinessServiceName = "From_SystemZ";
+Override with name of existing business process routing engine on production
+Parameter TargetConfigName = "MsgRouter";</Description>
+<Default>Name</Default>
+</Parameter>
+
+<Parameter name="IncludeDirs">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="NewLine">
+<Default>10</Default>
+</Parameter>
+
+<Parameter name="SendSyncDescription">
+<Default>BulkProfile</Default>
+</Parameter>
+
+<Method name="EvaluateRecords">
+<Description>
+Main entry point.
+Invoke this method to profile rule execution</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>inputDirectory="",fileWildCard="*.hl7",outputReportPath="",pSourceBusinessServiceName:%String,pTargetConfigName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ..Cleanup()
+	set ^||WaterMark=0
+	&SQL(SELECT %NOLOCK top 1 ID into :watermark FROM Ens_Rule.Log order by ID DESC)
+	set:SQLCODE=0 ^||WaterMark=watermark
+	
+	set ret=$$$OK
+	if '##class(%File).DirectoryExists(inputDirectory) {
+		set errorMessage="Directory """_inputDirectory_""" not found"
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		quit $$$ERROR(5001,errorMessage)			
+	}
+	if inputDirectory'?1(1"\",1A1":\",1"/")1.E {
+		set errorMessage="Directory """_inputDirectory_""" invalid. Must be absolute path containing one subdirectory"
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		quit $$$ERROR(5001,errorMessage)		
+	}
+	// get filesystem directory path seperator
+	set seperator=$S($L(inputDirectory,"/")>1:"/",1:"\")
+	// ensure trailing seperator
+	set:$E(inputDirectory,*)'=seperator inputDirectory=inputDirectory_seperator
+	// if outputReportPath has no directory, reuse input directory for report output location
+	if $L($TR(outputReportPath,"\/"))=$L(outputReportPath) {
+		// just the filename, no directory so output report to output directory
+		set outputReportPath=inputDirectory_outputReportPath
+	}
+	if outputReportPath'?1(1"\",1A1":\",1"/")1.E {
+		set errorMessage="Output Report Path """_outputReportPath_""" invalid. Must be absolute path containing one subdirectory"
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		quit $$$ERROR(5001,errorMessage)
+	}
+	if ##class(%File).DirectoryExists(outputReportPath) {
+		if $E(outputReportPath,*)'?1(1"/",1"\") {
+			// Default the filename
+			set outputReportPath=outputReportPath_$S($L(outputReportPath,"/")>1:"/",1:"\")_"HL7BulkRouteProfile"_$TR($ZDT($H,3)," :")_".csv"
+		}
+	}
+	
+	// Get list of input filename to process
+	set rs=##class(%ResultSet).%New("%File:FileSet")
+	set sortBy="Name"
+	set includeDirs=0
+	set tSC=rs.Execute(inputDirectory,fileWildCard,..#SortBy,..#IncludeDirs)
+	for {
+		quit:'rs.Next()
+		set filename=rs.Data("Name")
+		continue:filename?1.2"."
+		continue:filename=""
+		set ^||Files(filename)=""
+	}
+	do rs.Close()
+	
+	
+	// Get the current production in focus
+	set tSC=..GetBusinessService(pSourceBusinessServiceName,.sourceBuinessService)
+	quit:$$$ISERR(tSC) tSC
+
+	// Loop over and process files
+	set filename=""
+	for {
+		set filename=$Order(^||Files(filename))
+		quit:filename=""
+		set hl7=..GetSourceMessage(filename)
+		if '$IsObject(hl7) {
+			set errorMessage="Unable to correlate file """_filename_""" to HL7. Skipping. Not route tested."
+			do ..LogMessage(errorMessage)
+			continue
+		}
+		do ..SendMessage(filename,hl7,sourceBuinessService,pTargetConfigName)
+	}
+	
+	do ..WriteReport(outputReportPath)
+	
+	// clean up
+	do ..Cleanup()
+]]></Implementation>
+</Method>
+
+<Method name="Cleanup">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[	Kill ^||Files,^||WaterMark,^||Report
+]]></Implementation>
+</Method>
+
+<Method name="GetBusinessService">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SourceBusinessServiceName:%String,*pBusinessService:Ens.BusinessService</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC=##class(Ens.Director).GetProductionStatus(.prodName,.pState)
+	if $$$ISERR(tSC) {
+		do ..LogMessage("Error getting production status")
+		do ..LogMessage("Exit. No work done")
+		do $SYSTEM.Status.DisplayError(tSC)
+		quit tSC
+		
+	}
+	if $G(prodName)="" {
+		set errorMessage="Error getting production status. Current Namespace must have a running production."
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		quit $$$ERROR(5001,errorMessage)
+	}
+	do ..LogMessage("Production name "_prodName)
+	
+	// Get Reference to 
+	if '##class(Ens.Director).IsProductionRunning() {
+		set errorMessage="Production "_prodName_" not runnning. Please start it and run utility again."
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		quit $$$ERROR(5001,errorMessage)
+	}
+	do ..LogMessage("""Config Item Name "_SourceBusinessServiceName_"""")
+	
+	set tSC=##class(Ens.Director).CreateBusinessService(SourceBusinessServiceName,.pBusinessService)
+	if $$$ISERR(tSC) {
+		set errorMessage="Problem creating Business Service reference for "_SourceBusinessServiceName_". Ensure enabled. May require poolsize 2 to run test depending on service type."
+		do ..LogMessage(errorMessage)
+		do ..LogMessage("Exit. No work done")
+		do $SYSTEM.Status.DisplayError(tSC)
+		quit $$$ERROR(5001,errorMessage)	
+	}
+	
+	set pBusinessService.%PreserveSession=0
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="SendMessage">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>filename:%String,message:EnsLib.HL7.Message=..HL7Message,pBusinessService:Ens.BusinessService,pTargetConfigName:%String</FormalSpec>
+<Implementation><![CDATA[
+	// Reuse the "Message Schema Category" setting of the Service instance 
+	// to correlate the intended Message DocType
+	// ie: Do what the production normally does
+	//(EnsLib.HL7.Service.Standard)
+	do message.PokeDocType(pBusinessService.resolveDocType(message, message.GetValueAt(1)))
+	// Reinitalise Session
+	Set pBusinessService.%SessionId=""
+	do pBusinessService.ForceSessionId()
+	// Send Message within production
+	set tSC=pBusinessService.SendRequestSync(pTargetConfigName,message,.pResponse,-30,..%ClassName(0)_":Filename="_filename)
+	if $$$ISOK(tSC) {
+		do ..LogMessage("Message for file "_filename_" sent")
+	}
+	if pBusinessService.%SessionId="" {
+		do ..LogMessage("SessionId not set")
+		quit
+	}
+	do ..LogMessage("SessionId was "_pBusinessService.%SessionId)	
+	
+	do ..AddReportLinesForFile(filename,pBusinessService.%SessionId)
+]]></Implementation>
+</Method>
+
+<Method name="GetSourceMessage">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>filename</FormalSpec>
+<ReturnType>EnsLib.HL7.Message</ReturnType>
+<Implementation><![CDATA[
+	#dim SourceMessage as EnsLib.HL7.Message
+	set stream=##class(%Stream.FileCharacter).%New()
+	set stream.Filename=filename
+	set lines=""
+	while 'stream.AtEnd
+	{
+		set line=$ZSTRIP(stream.ReadLine(),"<w")
+		continue:line=""
+		set lines=lines_($S($L(lines)=0:"",1:$C(..#NewLine)))_line
+	}
+	set SourceMessage=##class(EnsLib.HL7.Message).ImportFromString(lines,.tSC)
+	quit:$$$ISERR(tSC) $$$NULLOREF
+	// Note poke DocType to build message map is done within "SendMessage" 
+	quit SourceMessage
+]]></Implementation>
+</Method>
+
+<Method name="AddReportLinesForFile">
+<Description>
+rule#1(SYSA):when#1
+send:To_SystemA:</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pFilename="",sessionId=""</FormalSpec>
+<Implementation><![CDATA[
+	quit:pFilename=""
+	// Watermark is to help mitigate performance challenge when large retention of RuleLogs on the system
+	set watermark=+$G(^||WaterMark)
+	&SQL(DECLARE ReasonReturn CURSOR FOR
+		SELECT ID, ConfigName, RuleName, Reason, ReturnValue
+		INTO :seq, :ConfigName, :RuleName, :Reason, :ReturnValue
+		FROM Ens_Rule.Log
+		WHERE ID>:watermark AND SessionId=:sessionId
+		ORDER by ID ASC)
+	// Orders earliest first
+	&SQL(OPEN ReasonReturn)
+	for {
+		&SQL(FETCH ReasonReturn)
+		Quit:SQLCODE'=0
+		set ^||Report(pFilename,seq)=$LB(ConfigName,RuleName,Reason,ReturnValue)
+	}
+	&SQL(CLOSE ReasonReturn)
+]]></Implementation>
+</Method>
+
+<Method name="LogMessage">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>message</FormalSpec>
+<Implementation><![CDATA[	Write !,message
+]]></Implementation>
+</Method>
+
+<Method name="WriteReport">
+<Description>
+Given output file name write out the report
+do ##class(UnitTest.RuleSet.BulkProfile).WriteReport(filename)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>outfile</FormalSpec>
+<Implementation><![CDATA[
+	
+	OPEN outfile:"NWS":2
+	if '$T {
+		do ..LogMessage("Unable to open output report file "_outfile)
+		do ..LogMessage("Skipping Report export")
+		quit	
+	}
+	try {
+	USE outfile write "Filename,ConfigName,RuleName,Reason,ReturnValue"
+	// Double escape string containing quote characters for Excel / convention
+	set inFilename=""
+	for {
+		set inFilename=$O(^||Report(inFilename))
+		quit:inFilename=""
+		
+		set seq=""
+		for {
+			set seq=$O(^||Report(inFilename,seq),1,data)
+			quit:seq=""	
+			
+			// assumes list length WIULL be four
+			USE outfile write !,..Esc(inFilename),",",..Esc($LG(data,1)),",",..Esc($LG(data,2)),",",..Esc($LG(data,3)),",",..Esc($LG(data,4))
+		}
+	}
+	} catch {}
+	/// Harmless if not open
+	CLOSE outfile
+]]></Implementation>
+</Method>
+
+<Method name="Esc">
+<Description><![CDATA[
+For client CSV readers escape double quotes
+Also when field contains commas also quote to avoid clash with field delimiter
+<!--
+Tested with:
+w ##class(UnitTest.RuleSet.BulkProfile).Esc("TEST")   => TEST
+w ##class(UnitTest.RuleSet.BulkProfile).Esc("TE,ST")  => "TE,ST"
+w ##class(UnitTest.RuleSet.BulkProfile).Esc("TE""ST") => "TE""ST"
+-->]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>val:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[$Select($L($TR(val,""","))<$L(val):""""_$Replace(val,"""","""""")_"""",1:val)
+]]></Implementation>
+</Method>
+</Class>
+</Export>
