@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-16 17:23:51">
+<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-16 17:57:28">
 <Class name="UnitTest.RuleSet.BulkProfile">
 <Description><![CDATA[
 <pre>
@@ -26,7 +26,7 @@ set targetName="MsgRouter"
 do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
 </example>]]></Description>
 <Abstract>1</Abstract>
-<TimeChanged>66306,62594.8462788</TimeChanged>
+<TimeChanged>66306,64257.5607827</TimeChanged>
 <TimeCreated>66304,75552.1931217</TimeCreated>
 
 <Parameter name="SortBy">
@@ -55,7 +55,7 @@ Parameter TargetConfigName = "MsgRouter";</Description>
 Main entry point.
 Invoke this method to profile rule execution</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>inputDirectory="",fileWildCard="*.hl7",outputReportPath="",pSourceBusinessServiceName:%String,pTargetConfigName:%String</FormalSpec>
+<FormalSpec>inputDirectory="",fileWildCard="*.hl7",outputReportPath="",pSourceBusinessServiceName:%String="",pTargetConfigName:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	do ..Cleanup()
@@ -190,7 +190,7 @@ Invoke this method to profile rule execution</Description>
 
 <Method name="SendMessage">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>filename:%String,message:EnsLib.HL7.Message=..HL7Message,pBusinessService:Ens.BusinessService,pTargetConfigName:%String</FormalSpec>
+<FormalSpec>filename:%String,message:EnsLib.HL7.Message=..HL7Message,pBusinessService:EnsLib.HL7.Service.Standard,pTargetConfigName:%String=""</FormalSpec>
 <Implementation><![CDATA[
 	// Reuse the "Message Schema Category" setting of the Service instance 
 	// to correlate the intended Message DocType
@@ -200,6 +200,8 @@ Invoke this method to profile rule execution</Description>
 	// Reinitalise Session
 	Set pBusinessService.%SessionId=""
 	do pBusinessService.ForceSessionId()
+	
+	set:pTargetConfigName="" pTargetConfigName=pBusinessService.TargetConfigNames
 	// Send Message within production
 	set tSC=pBusinessService.SendRequestSync(pTargetConfigName,message,.pResponse,-30,..%ClassName(0)_":Filename="_filename)
 	if $$$ISOK(tSC) {
