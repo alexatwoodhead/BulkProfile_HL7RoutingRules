@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-16 17:57:28">
+<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-17 09:55:07">
 <Class name="UnitTest.RuleSet.BulkProfile">
 <Description><![CDATA[
 <pre>
@@ -26,7 +26,7 @@ set targetName="MsgRouter"
 do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
 </example>]]></Description>
 <Abstract>1</Abstract>
-<TimeChanged>66306,64257.5607827</TimeChanged>
+<TimeChanged>66307,33397.8952047</TimeChanged>
 <TimeCreated>66304,75552.1931217</TimeCreated>
 
 <Parameter name="SortBy">
@@ -192,6 +192,9 @@ Invoke this method to profile rule execution</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>filename:%String,message:EnsLib.HL7.Message=..HL7Message,pBusinessService:EnsLib.HL7.Service.Standard,pTargetConfigName:%String=""</FormalSpec>
 <Implementation><![CDATA[
+	// Only want the files name without the directory part
+	// This allows differently named source directories to be used across Systems, to have consistent output reporting 
+	set filename=##class(%File).GetFilename(filename)
 	// Reuse the "Message Schema Category" setting of the Service instance 
 	// to correlate the intended Message DocType
 	// ie: Do what the production normally does
