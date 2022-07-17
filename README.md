@@ -4,7 +4,7 @@ IRIS Integration utility to report difference in Routing HL7 behaviour between S
 Implementation consists of the single class: UnitTest.RuleSet.BulkProfile
 
 ## Requirement
-* Facilitate bulk profiling of HL7 messages on existing production WITHOUT having to swap existing Services for FileService equivalents.
+* Facilitate bulk profiling of HL7 message routing on existing production WITHOUT having to swap existing Services for FileService equivalents.
 * Avoid manually writing UnitTests
 * Apply current production message schema behavior
 
