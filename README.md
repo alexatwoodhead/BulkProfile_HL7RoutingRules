@@ -48,4 +48,7 @@ Argument "targetName" - (Optional)
 
 By default CSV reports will be created in same directory as source HL7 input files. Specify an absolute path if you want in a different location.
 
-
+## Tested on releases
+* IRIS 4 Health - RedHat 2018.1.2
+* IRIS 4 Health - RedHat 2022.1
+* IRIS 4 Health - Windows 2022.1 
