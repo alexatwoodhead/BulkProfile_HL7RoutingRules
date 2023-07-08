@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+  <Document name="alwo-unittest-ruleset-bulkprofile.ZPM">
+    <Module>
+      <Name>alwo-unittest-ruleset-bulkprofile</Name>
+      <Version>1.0.1</Version>
+      <Description>Report difference in Routing HL7 behaviour between Systems versions</Description>
+      <Keywords>HL7 RoutingRule Testing</Keywords>
+      <Packaging>module</Packaging>
+      <SourcesRoot>udl</SourcesRoot>
+	  <Resource Name="alwo.UnitTest.RuleSet.BulkProfile.CLS"/>
+    </Module>
+  </Document>
+</Export>

@@ -1,7 +1,7 @@
 # BulkProfile_HL7RoutingRules
 IRIS Integration utility to report difference in Routing HL7 behaviour between Systems and versions.
 
-Implementation consists of the single class: UnitTest.RuleSet.BulkProfile
+Implementation consists of the single class: alwo.UnitTest.RuleSet.BulkProfile
 
 ## Requirement
 * Facilitate bulk profiling of HL7 message routing on existing production WITHOUT having to swap existing Services for FileService equivalents.
@@ -32,7 +32,7 @@ set fileWildCard="*.txt"
 set outputReport="RuleReportIRIS2022.csv"
 set serviceName="From_SystemZ"
 set targetName="MsgRouter"
-do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
+do ##class(alwo.UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
 
 ```
 Argument "fileWildCard"
