@@ -24,6 +24,9 @@ Using faviorite comprison tool:
 
 ![Comparison of Report files](/images/CompareCSV.png "Comparison of Report files")
 
+## Install
+IPM (ZPM) : install alwo-unittest-ruleset-bulkprofile
+
 ## How to run utility
 
 ```objectscript
