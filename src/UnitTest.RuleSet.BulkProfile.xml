@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1 (Build 191U)" ts="2022-07-17 09:55:07">
-<Class name="UnitTest.RuleSet.BulkProfile">
+<Export generator="IRIS" version="26">
+<Class name="alwo.UnitTest.RuleSet.BulkProfile">
 <Description><![CDATA[
 <pre>
 Copyright (c) Alex Woodhead 2022
@@ -23,10 +23,9 @@ set fileWildCard="*.txt"
 set outputReport="RuleReportIRIS2022.csv"
 set serviceName="From_SystemZ"
 set targetName="MsgRouter"
-do ##class(UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
+do ##class(alwo.UnitTest.RuleSet.BulkProfile).EvaluateRecords(inputDirectory,fileWildCard,outputReport,serviceName,targetName)
 </example>]]></Description>
 <Abstract>1</Abstract>
-<TimeChanged>66307,33397.8952047</TimeChanged>
 <TimeCreated>66304,75552.1931217</TimeCreated>
 
 <Parameter name="SortBy">
@@ -279,7 +278,7 @@ send:To_SystemA:</Description>
 <Method name="WriteReport">
 <Description>
 Given output file name write out the report
-do ##class(UnitTest.RuleSet.BulkProfile).WriteReport(filename)</Description>
+do ##class(alwo.UnitTest.RuleSet.BulkProfile).WriteReport(filename)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>outfile</FormalSpec>
 <Implementation><![CDATA[
@@ -319,9 +318,9 @@ For client CSV readers escape double quotes
 Also when field contains commas also quote to avoid clash with field delimiter
 <!--
 Tested with:
-w ##class(UnitTest.RuleSet.BulkProfile).Esc("TEST")   => TEST
-w ##class(UnitTest.RuleSet.BulkProfile).Esc("TE,ST")  => "TE,ST"
-w ##class(UnitTest.RuleSet.BulkProfile).Esc("TE""ST") => "TE""ST"
+w ##class(alwo.UnitTest.RuleSet.BulkProfile).Esc("TEST")   => TEST
+w ##class(alwo.UnitTest.RuleSet.BulkProfile).Esc("TE,ST")  => "TE,ST"
+w ##class(alwo.UnitTest.RuleSet.BulkProfile).Esc("TE""ST") => "TE""ST"
 -->]]></Description>
 <ClassMethod>1</ClassMethod>
 <CodeMode>expression</CodeMode>
