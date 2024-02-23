@@ -57,7 +57,8 @@ By default CSV reports will be created in same directory as source HL7 input fil
 * IRIS 4 Health - Windows 2022.1
 
 ## DOCKER Support
-* running on intersystemsdc/irishealth-community
+* running on intersystemsdc/irishealth-community:latest
+* using the actual version of IPM
 ### Prerequisites   
 Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Docker desktop](https://www.docker.com/products/docker-desktop) installed.    
 ### Installation    
