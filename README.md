@@ -68,10 +68,6 @@ $ git clone https://github.com/alexatwoodhead/BulkProfile_HL7RoutingRules.git
 ```
 Open the terminal in this directory and run:
 ```
-$ docker-compose build
-```
-Run IRIS container with your project:
-```
 $ docker-compose up -d
 ```
 Command line access from docker console
