@@ -54,4 +54,29 @@ By default CSV reports will be created in same directory as source HL7 input fil
 ## Tested on releases
 * IRIS 4 Health - RedHat 2018.1.2
 * IRIS 4 Health - RedHat 2022.1
-* IRIS 4 Health - Windows 2022.1 
+* IRIS 4 Health - Windows 2022.1
+
+## DOCKER Support
+* running on intersystemsdc/irishealth-community:latest
+* using the actual version of IPM
+### Prerequisites   
+Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Docker desktop](https://www.docker.com/products/docker-desktop) installed.    
+### Installation    
+Clone/git pull the repo into any local directory
+```
+$ git clone https://github.com/alexatwoodhead/BulkProfile_HL7RoutingRules.git 
+```
+Open the terminal in this directory and run:
+```
+$ docker-compose up -d
+```
+Command line access from docker console
+```
+$ docker-compose exec iris iris session iris
+USER>
+```
+or using **WebTerminal**
+```
+http://localhost:42773/terminal/
+```  
+Access to files must of course be adjusted to Linux/Unix style. 
